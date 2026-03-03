@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>FloodStats — Relatório de Análise</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px auto; max-width: 900px; line-height: 1.6; color: #333; }
+h1, h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #f4f7f6; color: #2c3e50; font-weight: bold; }
+tr:nth-child(even) { background-color: #fbfbfb; }
+svg { display: block; margin: 30px auto; border: 1px solid #ccc; background-color: #fafafa; }
+footer { text-align: center; margin-top: 50px; font-size: 0.9em; color: #777; border-top: 1px solid #eee; padding-top: 20px; }
+.header-info { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+.header-info p { margin: 5px 0; font-weight: 500; }
+</style>
+</head>
+<body>
+<header>
+<h1>Relatório de Análise Hidrológica</h1>
+<div class="header-info">
+<p><strong>Local:</strong> São Paulo</p>
+<p><strong>Período:</strong> 2024-01-01 a 2024-12-31</p>
+<p><strong>Tipo de Dado:</strong> Precipitação (mm)</p>
+<p><strong>Gerado em:</strong> 2026-02-24 17:56:17</p>
+</div>
+</header>
+<section id="estatisticas">
+<h2>Resultados Estatísticos</h2>
+<table>
+<tr><th>Métrica</th><th>Valor</th></tr>
+<tr><td>Média</td><td>3,41 mm</td></tr>
+<tr><td>Mediana</td><td>0,20 mm</td></tr>
+<tr><td>Moda</td><td>0,00 mm</td></tr>
+<tr><td>Variância</td><td>44,39</td></tr>
+<tr><td>Desvio Padrão</td><td>6,66</td></tr>
+<tr><td>Tendência (mm/dia)</td><td>0,0004 ( Tendência de Alta )</td></tr>
+</table>
+</section>
+<section id="grafico">
+<h2>Gráfico Temporal</h2>
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+<rect width="800" height="400" fill="white" />
+<line x1="50" y1="350" x2="750" y2="350" stroke="black" stroke-width="2" />
+<line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+<line x1="50" y1="350" x2="750" y2="350" stroke="lightgray" stroke-width="1" />
+<text x="40" y="355" font-size="12" text-anchor="end" fill="black">0,0</text>
+<line x1="50" y1="290" x2="750" y2="290" stroke="lightgray" stroke-width="1" />
+<text x="40" y="295" font-size="12" text-anchor="end" fill="black">9,0</text>
+<line x1="50" y1="230" x2="750" y2="230" stroke="lightgray" stroke-width="1" />
+<text x="40" y="235" font-size="12" text-anchor="end" fill="black">17,9</text>
+<line x1="50" y1="170" x2="750" y2="170" stroke="lightgray" stroke-width="1" />
+<text x="40" y="175" font-size="12" text-anchor="end" fill="black">26,9</text>
+<line x1="50" y1="110" x2="750" y2="110" stroke="lightgray" stroke-width="1" />
+<text x="40" y="115" font-size="12" text-anchor="end" fill="black">35,8</text>
+<line x1="50" y1="50" x2="750" y2="50" stroke="lightgray" stroke-width="1" />
+<text x="40" y="55" font-size="12" text-anchor="end" fill="black">44,8</text>
+<polyline fill="none" stroke="#3498db" stroke-width="2" points="50,347 51,333 53,130 55,327 57,339 59,347 61,347 63,348 65,341 67,232 69,296 71,229 73,199 74,346 76,350 78,341 80,343 82,347 84,234 86,298 88,289 90,343 92,275 94,277 96,275 97,335 99,334 101,314 103,348 105,347 107,303 109,325 111,258 113,347 115,313 117,348 119,347 120,350 122,350 124,350 126,350 128,349 130,335 132,235 134,157 136,293 138,347 140,322 142,307 143,335 145,170 147,193 149,331 151,311 153,309 155,329 157,334 159,350 161,314 163,307 165,296 166,350 168,350 170,350 172,187 174,232 176,332 178,280 180,328 182,326 184,348 186,350 188,350 190,350 191,350 193,350 195,283 197,286 199,343 201,346 203,280 205,312 207,289 209,274 211,347 213,344 214,342 216,293 218,319 220,347 222,350 224,350 226,349 228,350 230,350 232,350 234,342 236,342 237,329 239,325 241,350 243,323 245,349 247,349 249,320 251,311 253,349 255,161 257,336 259,350 260,350 262,350 264,350 266,350 268,350 270,347 272,349 274,350 276,350 278,349 280,350 282,350 283,350 285,350 287,350 289,350 291,350 293,350 295,350 297,349 299,348 301,350 303,350 305,350 306,331 308,338 310,350 312,350 314,350 316,348 318,339 320,350 322,350 324,350 326,347 328,342 330,272 331,225 333,348 335,350 337,350 339,350 341,350 343,350 345,349 347,346 349,345 351,350 353,350 354,350 356,350 358,350 360,350 362,350 364,350 366,350 368,350 370,350 372,350 374,350 376,350 377,350 379,350 381,350 383,350 385,350 387,347 389,350 391,343 393,350 395,333 397,343 399,348 400,350 402,350 404,350 406,350 408,348 410,350 412,335 414,187 416,313 418,350 420,345 422,349 423,350 425,349 427,350 429,348 431,350 433,350 435,350 437,350 439,350 441,350 443,350 445,350 446,350 448,350 450,350 452,346 454,329 456,350 458,350 460,350 462,350 464,350 466,350 468,350 470,350 471,350 473,268 475,128 477,350 479,350 481,349 483,350 485,350 487,350 489,350 491,350 493,350 494,350 496,350 498,350 500,350 502,307 504,305 506,350 508,350 510,350 512,350 514,350 516,350 517,350 519,350 521,350 523,350 525,347 527,349 529,350 531,350 533,350 535,350 537,350 539,350 540,350 542,350 544,344 546,293 548,341 550,350 552,345 554,349 556,344 558,350 560,350 562,350 563,350 565,350 567,337 569,350 571,350 573,349 575,350 577,350 579,301 581,319 583,348 585,350 586,350 588,350 590,347 592,278 594,300 596,333 598,348 600,348 602,350 604,332 606,350 608,350 610,291 611,293 613,347 615,320 617,256 619,293 621,318 623,332 625,341 627,350 629,343 631,349 633,337 634,340 636,260 638,216 640,303 642,232 644,177 646,240 648,77 650,344 652,349 654,350 656,336 657,275 659,349 661,317 663,226 665,347 667,350 669,350 671,337 673,343 675,336 677,333 679,348 680,348 682,350 684,350 686,311 688,321 690,338 692,348 694,308 696,213 698,334 700,245 702,332 703,348 705,320 707,326 709,203 711,341 713,349 715,341 717,323 719,303 721,345 723,344 725,348 726,350 728,295 730,229 732,256 734,319 736,331 738,287 740,97 742,148 744,325 746,317 748,310 750,321 " />
+<line x1="50" y1="327" x2="750" y2="326" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" />
+<text x="670" y="70" font-size="14" fill="#e74c3c">Tendência</text>
+<text x="670" y="90" font-size="14" fill="#3498db">Dados Reais</text>
+</svg>
+</section>
+<section id="dados">
+<h2>Dados Coletados (Amostra de 15 registros)</h2>
+<table>
+<tr><th>Data</th><th>Valor</th><th>Unidade</th></tr>
+<tr><td>2024-01-01</td><td>0,30</td><td>mm</td></tr>
+<tr><td>2024-01-02</td><td>2,50</td><td>mm</td></tr>
+<tr><td>2024-01-03</td><td>32,70</td><td>mm</td></tr>
+<tr><td>2024-01-04</td><td>3,40</td><td>mm</td></tr>
+<tr><td>2024-01-05</td><td>1,50</td><td>mm</td></tr>
+<tr><td>2024-01-06</td><td>0,30</td><td>mm</td></tr>
+<tr><td>2024-01-07</td><td>0,40</td><td>mm</td></tr>
+<tr><td>2024-01-08</td><td>0,20</td><td>mm</td></tr>
+<tr><td>2024-01-09</td><td>1,20</td><td>mm</td></tr>
+<tr><td>2024-01-10</td><td>17,50</td><td>mm</td></tr>
+<tr><td>2024-01-11</td><td>8,00</td><td>mm</td></tr>
+<tr><td>2024-01-12</td><td>18,00</td><td>mm</td></tr>
+<tr><td>2024-01-13</td><td>22,40</td><td>mm</td></tr>
+<tr><td>2024-01-14</td><td>0,50</td><td>mm</td></tr>
+<tr><td>2024-01-15</td><td>0,00</td><td>mm</td></tr>
+<tr><td colspan='3'>... e mais 351 registros.</td></tr>
+</table>
+</section>
+<footer>
+<p>FloodStats v1.0 — Sistema de Monitoramento Estatístico de Enchentes</p>
+</footer>
+</body>
+</html>

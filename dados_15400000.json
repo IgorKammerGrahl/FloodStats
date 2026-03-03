@@ -1,0 +1,175 @@
+{
+  "analysisId": "19b3af07-5ac1-4519-965b-d429fd729fbe",
+  "dataType": "RIVER_DISCHARGE",
+  "location": "Lat: -8.7483, Lon: -63.9169",
+  "records": [
+    {
+      "date": "2023-11-01",
+      "value": 0.71,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-02",
+      "value": 0.23,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-03",
+      "value": 0.2,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-04",
+      "value": 0.35,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-05",
+      "value": 0.44,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-06",
+      "value": 0.37,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-07",
+      "value": 0.35,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-08",
+      "value": 0.26,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-09",
+      "value": 0.71,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-10",
+      "value": 0.52,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-11",
+      "value": 0.22,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-12",
+      "value": 0.2,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-13",
+      "value": 0.17,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-14",
+      "value": 0.21,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-15",
+      "value": 0.31,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-16",
+      "value": 0.29,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-17",
+      "value": 0.25,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-18",
+      "value": 0.22,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-19",
+      "value": 0.19,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-20",
+      "value": 0.44,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-21",
+      "value": 0.51,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-22",
+      "value": 0.32,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-23",
+      "value": 0.29,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-24",
+      "value": 0.24,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-25",
+      "value": 0.21,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-26",
+      "value": 0.44,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-27",
+      "value": 0.44,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    },
+    {
+      "date": "2023-11-28",
+      "value": 0.53,
+      "unit": "m³/s",
+      "locationName": "Lat: -8.7483, Lon: -63.9169"
+    }
+  ]
+}

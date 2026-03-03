@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>FloodStats — Relatório de Análise</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px auto; max-width: 900px; line-height: 1.6; color: #333; }
+h1, h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #f4f7f6; color: #2c3e50; font-weight: bold; }
+tr:nth-child(even) { background-color: #fbfbfb; }
+svg { display: block; margin: 30px auto; border: 1px solid #ccc; background-color: #fafafa; }
+footer { text-align: center; margin-top: 50px; font-size: 0.9em; color: #777; border-top: 1px solid #eee; padding-top: 20px; }
+.header-info { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
+.header-info p { margin: 5px 0; font-weight: 500; }
+</style>
+</head>
+<body>
+<header>
+<h1>Relatório de Análise Hidrológica</h1>
+<div class="header-info">
+<p><strong>Local:</strong> Lat: -8.7483, Lon: -63.9169</p>
+<p><strong>Período:</strong> 2023-11-01 a 2023-11-28</p>
+<p><strong>Tipo de Dado:</strong> Vazão (m³/s)</p>
+<p><strong>Gerado em:</strong> 2026-03-03 19:13:03</p>
+</div>
+</header>
+<section id="estatisticas">
+<h2>Resultados Estatísticos</h2>
+<table>
+<tr><th>Métrica</th><th>Valor</th></tr>
+<tr><td>Média</td><td>0,34 m³/s</td></tr>
+<tr><td>Mediana</td><td>0,30 m³/s</td></tr>
+<tr><td>Moda</td><td>0,44 m³/s</td></tr>
+<tr><td>Variância</td><td>0,02</td></tr>
+<tr><td>Desvio Padrão</td><td>0,15</td></tr>
+<tr><td>Tendência (m³/s/dia)</td><td>-0,0013 ( Tendência de Baixa )</td></tr>
+</table>
+</section>
+<section id="grafico">
+<h2>Gráfico Temporal</h2>
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+<rect width="800" height="400" fill="white" />
+<line x1="50" y1="350" x2="750" y2="350" stroke="black" stroke-width="2" />
+<line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+<line x1="50" y1="350" x2="750" y2="350" stroke="lightgray" stroke-width="1" />
+<text x="40" y="355" font-size="12" text-anchor="end" fill="black">0,2</text>
+<line x1="50" y1="290" x2="750" y2="290" stroke="lightgray" stroke-width="1" />
+<text x="40" y="295" font-size="12" text-anchor="end" fill="black">0,3</text>
+<line x1="50" y1="230" x2="750" y2="230" stroke="lightgray" stroke-width="1" />
+<text x="40" y="235" font-size="12" text-anchor="end" fill="black">0,4</text>
+<line x1="50" y1="170" x2="750" y2="170" stroke="lightgray" stroke-width="1" />
+<text x="40" y="175" font-size="12" text-anchor="end" fill="black">0,5</text>
+<line x1="50" y1="110" x2="750" y2="110" stroke="lightgray" stroke-width="1" />
+<text x="40" y="115" font-size="12" text-anchor="end" fill="black">0,7</text>
+<line x1="50" y1="50" x2="750" y2="50" stroke="lightgray" stroke-width="1" />
+<text x="40" y="55" font-size="12" text-anchor="end" fill="black">0,8</text>
+<polyline fill="none" stroke="#3498db" stroke-width="2" points="50,84 75,320 101,335 127,261 153,217 179,251 205,261 231,305 257,84 283,178 309,325 335,335 361,350 387,330 412,281 438,291 464,310 490,325 516,340 542,217 568,183 594,276 620,291 646,315 672,330 698,217 724,217 750,173 " />
+<line x1="50" y1="256" x2="750" y2="273" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" />
+<text x="670" y="70" font-size="14" fill="#e74c3c">Tendência</text>
+<text x="670" y="90" font-size="14" fill="#3498db">Dados Reais</text>
+</svg>
+</section>
+<section id="dados">
+<h2>Dados Coletados (Amostra de 15 registros)</h2>
+<table>
+<tr><th>Data</th><th>Valor</th><th>Unidade</th></tr>
+<tr><td>2023-11-01</td><td>0,71</td><td>m³/s</td></tr>
+<tr><td>2023-11-02</td><td>0,23</td><td>m³/s</td></tr>
+<tr><td>2023-11-03</td><td>0,20</td><td>m³/s</td></tr>
+<tr><td>2023-11-04</td><td>0,35</td><td>m³/s</td></tr>
+<tr><td>2023-11-05</td><td>0,44</td><td>m³/s</td></tr>
+<tr><td>2023-11-06</td><td>0,37</td><td>m³/s</td></tr>
+<tr><td>2023-11-07</td><td>0,35</td><td>m³/s</td></tr>
+<tr><td>2023-11-08</td><td>0,26</td><td>m³/s</td></tr>
+<tr><td>2023-11-09</td><td>0,71</td><td>m³/s</td></tr>
+<tr><td>2023-11-10</td><td>0,52</td><td>m³/s</td></tr>
+<tr><td>2023-11-11</td><td>0,22</td><td>m³/s</td></tr>
+<tr><td>2023-11-12</td><td>0,20</td><td>m³/s</td></tr>
+<tr><td>2023-11-13</td><td>0,17</td><td>m³/s</td></tr>
+<tr><td>2023-11-14</td><td>0,21</td><td>m³/s</td></tr>
+<tr><td>2023-11-15</td><td>0,31</td><td>m³/s</td></tr>
+<tr><td colspan='3'>... e mais 13 registros.</td></tr>
+</table>
+</section>
+<footer>
+<p>FloodStats v1.0 — Sistema de Monitoramento Estatístico de Enchentes</p>
+</footer>
+</body>
+</html>

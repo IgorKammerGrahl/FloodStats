@@ -1,0 +1,100 @@
+@startuml
+
+package "Domain" {
+
+abstract class HydroRecord {
+  - timestamp : LocalDateTime
+  - location : String
+  - value : double
+  + getValue() : double
+}
+
+class RainfallRecord extends HydroRecord
+class RiverDischargeRecord extends HydroRecord
+
+class StatisticsResult {
+  - mean : double
+  - median : double
+  - mode : double
+  - variance : double
+  - stdDeviation : double
+}
+
+class StatisticsCalculator {
+  + calculate(records : List<HydroRecord>) : StatisticsResult
+}
+
+class TrendCalculator {
+  + calculateTrend(records : List<HydroRecord>) : String
+}
+
+}
+
+package "Infrastructure - Data Source" {
+
+interface DataFetcher {
+  + fetchData() : List<HydroRecord>
+}
+
+class OpenMeteoFetcher implements DataFetcher
+
+class DataFetcherFactory {
+  + createFetcher(type : String) : DataFetcher
+}
+
+}
+
+package "Infrastructure - Persistence" {
+
+interface PersistenceStrategy {
+  + save(records : List<HydroRecord>)
+}
+
+class DatabasePersistence implements PersistenceStrategy
+class JsonPersistence implements PersistenceStrategy
+class XmlPersistence implements PersistenceStrategy
+
+}
+
+package "Application" {
+
+class ReportService {
+  + generateReport(records : List<HydroRecord>, stats : StatisticsResult)
+}
+
+class FloodStatsApp {
+  + run()
+}
+
+}
+
+package "Presentation" {
+
+class ConsoleUI {
+  + start()
+}
+
+}
+
+HydroRecord <|-- RainfallRecord
+HydroRecord <|-- RiverDischargeRecord
+
+StatisticsCalculator --> HydroRecord
+TrendCalculator --> HydroRecord
+
+DataFetcherFactory --> DataFetcher
+OpenMeteoFetcher ..|> DataFetcher
+
+DatabasePersistence ..|> PersistenceStrategy
+JsonPersistence ..|> PersistenceStrategy
+XmlPersistence ..|> PersistenceStrategy
+
+FloodStatsApp --> DataFetcherFactory
+FloodStatsApp --> StatisticsCalculator
+FloodStatsApp --> TrendCalculator
+FloodStatsApp --> ReportService
+FloodStatsApp --> PersistenceStrategy
+
+ConsoleUI --> FloodStatsApp
+
+@enduml
