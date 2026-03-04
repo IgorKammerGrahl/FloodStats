@@ -21,20 +21,20 @@ public class AnalyzeCommand implements Callable<Integer> {
             "--location" }, description = "Código Numérico da Estação de 8 dígitos (Ex: 15400000)", defaultValue = "")
     private String locationName;
 
-    @Option(names = { "--lat" }, description = "Latitude", required = true)
+    @Option(names = { "--lat" }, description = "Latitude")
     private Double latitude;
 
-    @Option(names = { "--lon" }, description = "Longitude", required = true)
+    @Option(names = { "--lon" }, description = "Longitude")
     private Double longitude;
 
-    @Option(names = { "-s", "--start" }, description = "Data de Início (AAAA-MM-DD)", required = true)
-    private LocalDate startDate;
+    @Option(names = { "-s", "--start" }, description = "Data de Início (AAAA-MM-DD)")
+    private String startDateStr;
 
-    @Option(names = { "-e", "--end" }, description = "Data de Fim (AAAA-MM-DD)", required = true)
-    private LocalDate endDate;
+    @Option(names = { "-e", "--end" }, description = "Data de Fim (AAAA-MM-DD)")
+    private String endDateStr;
 
     @Option(names = { "-t",
-            "--type" }, description = "Tipo de dado (RAINFALL, RIVER_DISCHARGE, WATER_LEVEL)", required = true)
+            "--type" }, description = "Tipo de dado (RAINFALL, RIVER_DISCHARGE, WATER_LEVEL)")
     private DataType dataType;
 
     @Option(names = { "-p",
@@ -46,7 +46,40 @@ public class AnalyzeCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try {
+        try (Scanner scanner = new Scanner(System.in)) {
+
+            if (latitude == null || longitude == null || startDateStr == null || endDateStr == null) {
+                System.out.println(CommandLine.Help.Ansi.AUTO
+                        .string("\n@|cyan Bem-vindo ao Assistente Interativo do FloodStats!|@"));
+                System.out.println("Deixe em branco e pressione [ENTER] para usar os valores padrão.\n");
+
+                System.out.print("Digite o Código da Estação ANA [Padrão: 15400000]: ");
+                String inLoc = scanner.nextLine().trim();
+                locationName = inLoc.isEmpty() ? "15400000" : inLoc;
+
+                System.out.print("Digite a Latitude [Padrão: -8.76]: ");
+                String inLat = scanner.nextLine().trim();
+                latitude = inLat.isEmpty() ? -8.76 : Double.parseDouble(inLat.replace(",", "."));
+
+                System.out.print("Digite a Longitude [Padrão: -63.90]: ");
+                String inLon = scanner.nextLine().trim();
+                longitude = inLon.isEmpty() ? -63.90 : Double.parseDouble(inLon.replace(",", "."));
+
+                System.out.print("Data de Início (YYYY-MM-DD) [Padrão: 2020-01-01]: ");
+                String inStart = scanner.nextLine().trim();
+                startDateStr = inStart.isEmpty() ? "2020-01-01" : inStart;
+
+                System.out.print("Data Final (YYYY-MM-DD) [Padrão: 2020-12-31]: ");
+                String inEnd = scanner.nextLine().trim();
+                endDateStr = inEnd.isEmpty() ? "2020-12-31" : inEnd;
+
+                if (dataType == null)
+                    dataType = DataType.RIVER_DISCHARGE;
+            }
+
+            LocalDate startDate = LocalDate.parse(startDateStr);
+            LocalDate endDate = LocalDate.parse(endDateStr);
+
             String locName = locationName;
             if (locName == null || locName.trim().isEmpty()) {
                 locName = latitude + "_" + longitude;
@@ -59,15 +92,13 @@ public class AnalyzeCommand implements Callable<Integer> {
                 System.out.print(CommandLine.Help.Ansi.AUTO
                         .string("@|yellow O arquivo '" + reportFileName
                                 + "' já existe. Deseja sobrescrever? (S/N): |@"));
-                try (Scanner scanner = new Scanner(System.in)) {
-                    String input = scanner.nextLine().trim().toUpperCase();
-                    if (input.equals("S")) {
-                        force = true;
-                    } else {
-                        System.out
-                                .println(CommandLine.Help.Ansi.AUTO.string("@|red Operação cancelada pelo usuário.|@"));
-                        return 0;
-                    }
+
+                String input = scanner.nextLine().trim().toUpperCase();
+                if (input.equals("S")) {
+                    force = true;
+                } else {
+                    System.out.println(CommandLine.Help.Ansi.AUTO.string("@|red Operação cancelada pelo usuário.|@"));
+                    return 0;
                 }
             }
 
@@ -76,7 +107,6 @@ public class AnalyzeCommand implements Callable<Integer> {
             FloodAnalysisService service = new FloodAnalysisService();
 
             service.analyze(request, force);
-            System.out.println(CommandLine.Help.Ansi.AUTO.string("@|green Análise concluída com sucesso!|@"));
 
             return 0;
         } catch (Exception e) {

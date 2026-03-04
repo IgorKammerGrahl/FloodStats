@@ -98,13 +98,37 @@ public class AnaHidroWebFetcher implements DataFetcher {
                         .GET()
                         .build();
 
-                HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                int maxRetries = 3;
+                int attempts = 0;
+                boolean success = false;
 
-                if (response.statusCode() == 200) {
-                    allRecords.addAll(parseResponse(response.body(), request.getDataType(), request.getStationCode()));
-                } else {
-                    System.err.println("\n\u001B[33mAviso API ANA: HTTP " + response.statusCode() + " para data "
-                            + dataBuscaStr + "\u001B[0m");
+                while (attempts < maxRetries && !success) {
+                    HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+                    if (response.statusCode() == 200) {
+                        allRecords.addAll(
+                                parseResponse(response.body(), request.getDataType(), request.getStationCode()));
+                        success = true;
+                    } else if (response.statusCode() >= 500 && response.statusCode() < 600) {
+                        attempts++;
+                        if (attempts < maxRetries) {
+                            System.err.println("\n\u001B[33mInstabilidade na ANA (Erro " + response.statusCode()
+                                    + "). Tentativa " + (attempts + 1) + " de " + maxRetries + "...\u001B[0m");
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        } else {
+                            System.err.println("\n\u001B[31mAviso API ANA: Falha ao obter dados após " + maxRetries
+                                    + " tentativas para data " + dataBuscaStr + " (HTTP " + response.statusCode()
+                                    + ")\u001B[0m");
+                        }
+                    } else {
+                        System.err.println("\n\u001B[33mAviso API ANA: HTTP " + response.statusCode() + " para data "
+                                + dataBuscaStr + "\u001B[0m");
+                        break;
+                    }
                 }
 
                 currentStartDate = currentStartDate.plusDays(30);

@@ -32,7 +32,7 @@ public class FloodAnalysisService {
         this.reportGenerator = new HtmlReportGenerator();
     }
 
-    public void analyze(AnalysisRequest request, boolean forceOverwrite) {
+    public br.edu.floodstats.application.dto.AnalysisResponse analyze(AnalysisRequest request, boolean forceOverwrite) {
         String locName = request.getStationCode() != null ? request.getStationCode()
                 : (request.getLatitude() + "_" + request.getLongitude());
         System.out.println("\nIniciando análise para " + locName + "...");
@@ -91,7 +91,7 @@ public class FloodAnalysisService {
 
             if (records.isEmpty()) {
                 System.out.println("\u001B[31mNenhum dado encontrado para os parâmetros informados.\u001B[0m");
-                return;
+                return null;
             }
             System.out.println("\u001B[32m" + records.size() + " registros consolidados com sucesso.\u001B[0m"); // Green
 
@@ -130,7 +130,12 @@ public class FloodAnalysisService {
 
             showResultsSummary(finalResult, records.get(0).getUnit());
 
-        } catch (Exception e) {
+            return new br.edu.floodstats.application.dto.AnalysisResponse(finalResult, records,
+                    records.get(0).getUnit());
+
+        } catch (
+
+        Exception e) {
             throw new RuntimeException("Falha de comunicação ou processamento: " + e.getMessage(), e);
         }
     }
