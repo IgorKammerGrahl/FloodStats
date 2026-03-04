@@ -71,7 +71,7 @@ public class ConsoleUI {
 
         AnalysisRequest request = new AnalysisRequest(locationName, lat, lon, startDate, endDate, dataType, format);
 
-        service.analyze(request, scanner);
+        service.analyze(request, false);
     }
 
     private void handleLoadData() {

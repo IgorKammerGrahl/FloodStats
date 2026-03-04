@@ -15,17 +15,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.edu.floodstats.infrastructure.config.ApiConfig;
-
 public class AnaHidroWebFetcher implements DataFetcher {
 
     private final AnaTokenService tokenService;
-    private final ApiConfig apiConfig;
+
     private final HttpClient httpClient;
 
     public AnaHidroWebFetcher(AnaTokenService tokenService) {
         this.tokenService = tokenService;
-        this.apiConfig = new ApiConfig();
+
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(15))
@@ -42,37 +40,104 @@ public class AnaHidroWebFetcher implements DataFetcher {
             // Para simplificar e bater com a documentação do projeto, passamos um cod base.
             String stationCode = "00000000";
             if (request.getStationCode() != null && !request.getStationCode().isEmpty()) {
-                stationCode = request.getStationCode(); // Ajuste simplificado
+                stationCode = java.net.URLEncoder.encode(request.getStationCode(),
+                        java.nio.charset.StandardCharsets.UTF_8.toString());
             }
 
-            String url = String.format(
-                    "%s/EstacoesTelemetricas/HidroinfoanaSerieTelemetricaAdotada/v1?CodigoDaEstacao=%s&TipoFiltroData=DATA_LEITURA&DataDeBusca=%s&RangeIntervaloDeBusca=DIAS_30",
-                    apiConfig.getAnaApiUrl(),
-                    stationCode,
-                    request.getStartDate().toString());
+            String baseUrl = "https://www.ana.gov.br/hidrowebservice/EstacoesTelemetricas/HidroinfoanaSerieTelemetricaAdotada/v1";
 
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
+            String codEstParam = java.net.URLEncoder.encode("Código da Estação",
+                    java.nio.charset.StandardCharsets.UTF_8.toString());
+            String tipoFiltroParam = java.net.URLEncoder.encode("Tipo Filtro Data",
+                    java.nio.charset.StandardCharsets.UTF_8.toString());
+            String dataBuscaParam = java.net.URLEncoder.encode("Data de Busca (yyyy-MM-dd)",
+                    java.nio.charset.StandardCharsets.UTF_8.toString());
+            String rangeParam = java.net.URLEncoder.encode("Range Intervalo de busca",
+                    java.nio.charset.StandardCharsets.UTF_8.toString());
 
-            HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                return parseResponse(response.body(), request.getDataType());
-            } else {
-                throw new DataFetchException("Erro API ANA: HTTP " + response.statusCode());
+            LocalDate currentStartDate = request.getStartDate();
+            LocalDate finalEndDate = request.getEndDate();
+            if (finalEndDate == null) {
+                finalEndDate = LocalDate.now();
             }
+
+            List<HydroRecord> allRecords = new ArrayList<>();
+
+            // UI Progress Bar Calculation
+            long totalDays = java.time.temporal.ChronoUnit.DAYS.between(currentStartDate, finalEndDate);
+            long totalBlocks = (totalDays / 30) + 1;
+            long currentBlock = 0;
+
+            while (!currentStartDate.isAfter(finalEndDate)) {
+                currentBlock++;
+                int percent = (int) (((double) currentBlock / totalBlocks) * 100);
+                if (percent > 100)
+                    percent = 100;
+
+                int filledBars = percent / 10;
+                StringBuilder barBuilder = new StringBuilder("[");
+                for (int i = 0; i < 10; i++) {
+                    if (i < filledBars)
+                        barBuilder.append("█");
+                    else
+                        barBuilder.append("░");
+                }
+                barBuilder.append("]");
+
+                System.out.print(
+                        "\r\u001B[36m" + barBuilder.toString() + " " + percent + "% Baixando dados da ANA...\u001B[0m");
+
+                String dataBuscaStr = currentStartDate.toString(); // Formato YYYY-MM-DD
+
+                String url = String.format("%s?%s=%s&%s=DATA_LEITURA&%s=%s&%s=DIAS_30",
+                        baseUrl, codEstParam, stationCode, tipoFiltroParam, dataBuscaParam, dataBuscaStr, rangeParam);
+
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("Authorization", "Bearer " + token)
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() == 200) {
+                    allRecords.addAll(parseResponse(response.body(), request.getDataType(), request.getStationCode()));
+                } else {
+                    System.err.println("\n\u001B[33mAviso API ANA: HTTP " + response.statusCode() + " para data "
+                            + dataBuscaStr + "\u001B[0m");
+                }
+
+                currentStartDate = currentStartDate.plusDays(30);
+
+                if (!currentStartDate.isAfter(finalEndDate)) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+            System.out.println(); // Quebra de linha ao finalizar loop
+
+            // Deduplication and sorting, strict date boundary check
+            java.util.Map<LocalDate, HydroRecord> uniqueRecords = new java.util.LinkedHashMap<>();
+            for (HydroRecord record : allRecords) {
+                if (!record.getDate().isBefore(request.getStartDate()) && !record.getDate().isAfter(finalEndDate)) {
+                    uniqueRecords.put(record.getDate(), record);
+                }
+            }
+            List<HydroRecord> sortedRecords = new ArrayList<>(uniqueRecords.values());
+            sortedRecords.sort(java.util.Comparator.comparing(HydroRecord::getDate));
+
+            return sortedRecords;
 
         } catch (Exception e) {
-            System.err.println("Erro na ANA: " + e.getMessage());
-            e.printStackTrace();
-            throw new DataFetchException("Falha ao buscar dados da ANA no HidroWeb: " + e.getMessage());
+            throw new DataFetchException("Falha ao buscar dados (HTTP): " + e.getMessage());
         }
     }
 
-    private List<HydroRecord> parseResponse(String jsonBody, br.edu.floodstats.domain.enums.DataType dataType) {
+    private List<HydroRecord> parseResponse(String jsonBody, br.edu.floodstats.domain.enums.DataType dataType,
+            String locationName) {
         List<HydroRecord> records = new ArrayList<>();
         JsonObject responseObj = JsonParser.parseString(jsonBody).getAsJsonObject();
         JsonArray items = responseObj.getAsJsonArray("items");
@@ -125,7 +190,7 @@ public class AnaHidroWebFetcher implements DataFetcher {
                 }
             }
 
-            if (value != null) {
+            if (value != null && value > 0.0) {
                 dailyAverages.put(date, dailyAverages.getOrDefault(date, 0.0) + value);
                 dailyCounts.put(date, dailyCounts.getOrDefault(date, 0) + 1);
             }
@@ -133,14 +198,15 @@ public class AnaHidroWebFetcher implements DataFetcher {
 
         // Finaliza instanciando um HydroRecord por dia
         String unit = br.edu.floodstats.domain.enums.DataType.RAINFALL.equals(dataType) ? "mm" : "m³/s";
+        String finalLocation = (locationName != null && !locationName.isEmpty()) ? locationName : "Estação ANA";
         for (java.util.Map.Entry<LocalDate, Double> entry : dailyAverages.entrySet()) {
             LocalDate date = entry.getKey();
             double avgValue = entry.getValue() / dailyCounts.get(date);
 
             if (br.edu.floodstats.domain.enums.DataType.RAINFALL.equals(dataType)) {
-                records.add(new RainfallRecord(date, avgValue, unit, "EstacaoANA"));
+                records.add(new RainfallRecord(date, avgValue, unit, finalLocation));
             } else {
-                records.add(new RiverDischargeRecord(date, avgValue, unit, "EstacaoANA"));
+                records.add(new RiverDischargeRecord(date, avgValue, unit, finalLocation));
             }
         }
 

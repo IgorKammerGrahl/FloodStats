@@ -37,25 +37,46 @@ public class AnaTokenService {
             return cachedToken;
         }
 
+        String identificador = apiConfig.getAnaApiIdentificador();
+        if (identificador != null) {
+            identificador = identificador.trim();
+        } else {
+            identificador = "";
+        }
+
+        String senha = apiConfig.getAnaApiSenha();
+        if (senha != null) {
+            senha = senha.trim();
+        } else {
+            senha = "";
+        }
+
+        System.out.println("[DEBUG] Identificador a ser enviado: [" + identificador + "]");
+        System.out.println("[DEBUG] Senha a ser enviada: [" + senha + "]");
+
+        // URL obrigatória do manual (diferente da base para outras requisições)
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiConfig.getAnaApiUrl() + "/EstacoesTelemetricas/OAUth/v1"))
-                .header("Identificador", apiConfig.getAnaApiIdentificador())
-                .header("Senha", apiConfig.getAnaApiSenha())
+                .uri(URI.create("https://www.ana.gov.br/hidrowebservice/EstacoesTelemetricas/OAUth/v1"))
+                .header("Identificador", identificador)
+                .header("Senha", senha)
                 .GET()
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            JsonObject jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
-            // A API retorna o token dentro de um array "items", pegamos o primeiro objeto
-            JsonObject item = jsonResponse.getAsJsonArray("items").get(0).getAsJsonObject();
-            String newToken = item.get("tokenautenticacao").getAsString();
+            try {
+                JsonObject jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
+                JsonObject itemsObj = jsonResponse.getAsJsonObject("items");
+                String newToken = itemsObj.get("tokenautenticacao").getAsString();
 
-            saveTokenToCache(newToken);
-            return newToken;
+                saveTokenToCache(newToken);
+                return newToken;
+            } catch (Exception e) {
+                throw new RuntimeException("Falha ao processar resposta da ANA (JSON inesperado): " + e.getMessage());
+            }
         } else {
-            throw new Exception("Falha ao obter token da ANA. Status Code: " + response.statusCode());
+            throw new RuntimeException("Falha ao obter token da ANA. Status: " + response.statusCode());
         }
     }
 

@@ -10,6 +10,7 @@ public class ApiConfig {
     public ApiConfig() {
         properties = new Properties();
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+            System.out.println("[DEBUG] Carregando credenciais do properties...");
             if (input == null) {
                 System.err.println("Aviso: arquivo application.properties não encontrado. Usando valores padrão.");
                 return;

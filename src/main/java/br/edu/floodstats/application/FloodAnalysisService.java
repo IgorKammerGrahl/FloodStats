@@ -14,7 +14,6 @@ import br.edu.floodstats.infrastructure.report.HtmlReportGenerator;
 import br.edu.floodstats.infrastructure.report.ReportGenerator;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class FloodAnalysisService {
     private final DataFetcherFactory fetcherFactory;
@@ -33,7 +32,7 @@ public class FloodAnalysisService {
         this.reportGenerator = new HtmlReportGenerator();
     }
 
-    public void analyze(AnalysisRequest request, Scanner scanner) {
+    public void analyze(AnalysisRequest request, boolean forceOverwrite) {
         String locName = request.getStationCode() != null ? request.getStationCode()
                 : (request.getLatitude() + "_" + request.getLongitude());
         System.out.println("\nIniciando análise para " + locName + "...");
@@ -64,8 +63,9 @@ public class FloodAnalysisService {
                         openMeteoRecords.addAll(fetchedRecords);
                     }
                 } catch (Exception e) {
-                    System.out.println("Aviso: Falha ao buscar dados de " + fetcher.getClass().getSimpleName() + ": "
-                            + e.getMessage());
+                    System.err.println(
+                            picocli.CommandLine.Help.Ansi.AUTO.string("@|yellow Aviso: Falha ao buscar dados de "
+                                    + fetcher.getClass().getSimpleName() + " -> " + e.getMessage() + "|@"));
                 }
             }
 
@@ -75,13 +75,12 @@ public class FloodAnalysisService {
                 double anaAvg = anaRecords.stream().mapToDouble(HydroRecord::getValue).average().orElse(0.0);
                 double meteoAvg = openMeteoRecords.stream().mapToDouble(HydroRecord::getValue).average().orElse(0.0);
 
-                // Se a ANA diz que o rio é gigante e o OpenMeteo diz que é um riacho
                 if (anaAvg > 100 && meteoAvg < 50) {
-                    System.out.println("\n[ALERTA] Discrepância massiva detectada entre Satélite ("
+                    System.out.println("\n\u001B[31m[ALERTA] Discrepância massiva detectada entre Satélite (" // Red
                             + String.format("%.2f", meteoAvg) + ") e Estação Física ANA ("
-                            + String.format("%.2f", anaAvg) + ").");
+                            + String.format("%.2f", anaAvg) + ").\u001B[0m");
                     System.out.println(
-                            "Descartando dados do satélite e utilizando a Estação ANA como Ground Truth absoluto.");
+                            "\u001B[33mDescartando dados do satélite e utilizando a Estação ANA como Ground Truth absoluto.\u001B[0m"); // Yellow
                     openMeteoRecords.clear(); // Discard OpenMeteo
                 }
             }
@@ -91,10 +90,10 @@ public class FloodAnalysisService {
             records.addAll(openMeteoRecords);
 
             if (records.isEmpty()) {
-                System.out.println("Nenhum dado encontrado para os parâmetros informados.");
+                System.out.println("\u001B[31mNenhum dado encontrado para os parâmetros informados.\u001B[0m");
                 return;
             }
-            System.out.println(records.size() + " registros consolidados com sucesso.");
+            System.out.println("\u001B[32m" + records.size() + " registros consolidados com sucesso.\u001B[0m"); // Green
 
             // 2. Calculate Statistics
             System.out.println("Calculando estatísticas e tendência...");
@@ -121,7 +120,7 @@ public class FloodAnalysisService {
             // 4. Generate Report
             String reportFileName = "relatorio_" + locName.replaceAll(" ", "_").toLowerCase()
                     + ".html";
-            if (reportService.checkAndConfirmOverwrite(reportFileName, scanner)) {
+            if (reportService.checkAndConfirmOverwrite(reportFileName, forceOverwrite)) {
                 System.out.println("Gerando relatório HTML...");
                 reportGenerator.generate(finalResult, records, reportFileName);
                 System.out.println("Relatório gerado com sucesso: " + reportFileName);
@@ -132,17 +131,30 @@ public class FloodAnalysisService {
             showResultsSummary(finalResult, records.get(0).getUnit());
 
         } catch (Exception e) {
-            System.err.println("Erro durante a análise: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Falha de comunicação ou processamento: " + e.getMessage(), e);
         }
     }
 
     private void showResultsSummary(StatisticalResult result, String unit) {
-        System.out.println("\n--- Resumo Estatístico ---");
-        System.out.printf("Tamanho da Amostra: %d dias\n", result.getSampleSize());
-        System.out.printf("Média: %.2f %s\n", result.getMean(), unit);
-        System.out.printf("Desvio Padrão: %.2f\n", result.getStandardDeviation());
-        System.out.printf("Tendência: %s\n", result.getTrendDescription());
-        System.out.println("--------------------------\n");
+        String reset = "\u001B[0m";
+        String cyan = "\u001B[36m";
+        String green = "\u001B[32m";
+
+        System.out.println("\n" + cyan + "+------------------------------------------+");
+        System.out.println("|" + reset + "            RESUMO ESTATÍSTICO            " + cyan + "|");
+        System.out.println("+------------------------------------------+" + reset);
+
+        System.out.printf(cyan + "|" + reset + " Tamanho da Amostra: %-21.21s" + cyan + "|\n",
+                result.getSampleSize() + " dias");
+        System.out.printf(cyan + "|" + reset + " Média:              %-21.21s" + cyan + "|\n",
+                String.format("%.2f %s", result.getMean(), unit));
+        System.out.printf(cyan + "|" + reset + " Desvio Padrão:      %-21.21s" + cyan + "|\n",
+                String.format("%.2f", result.getStandardDeviation()));
+        System.out.printf(cyan + "|" + reset + " Tendência:          %-21.21s" + cyan + "|\n",
+                result.getTrendDescription());
+
+        System.out.println(cyan + "+------------------------------------------+" + reset + "\n");
+
+        System.out.println(green + "Análise concluída com sucesso!" + reset);
     }
 }
