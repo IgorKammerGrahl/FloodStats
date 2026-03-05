@@ -1,6 +1,5 @@
 package br.edu.floodstats.application;
 
-import br.edu.floodstats.domain.enums.PersistenceFormat;
 import br.edu.floodstats.domain.model.AnalysisRequest;
 import br.edu.floodstats.domain.model.HydroRecord;
 import br.edu.floodstats.domain.model.StatisticalResult;
@@ -8,28 +7,35 @@ import br.edu.floodstats.domain.stats.StatisticsCalculator;
 import br.edu.floodstats.domain.stats.TrendCalculator;
 import br.edu.floodstats.infrastructure.api.DataFetcher;
 import br.edu.floodstats.infrastructure.factory.DataFetcherFactory;
-import br.edu.floodstats.infrastructure.factory.PersistenceFactory;
-import br.edu.floodstats.infrastructure.persistence.DataPersistence;
 import br.edu.floodstats.infrastructure.report.HtmlReportGenerator;
 import br.edu.floodstats.infrastructure.report.ReportGenerator;
 
+import br.edu.floodstats.domain.repository.HydrologyRepository;
+import br.edu.floodstats.infrastructure.persistence.JsonRepository;
+import br.edu.floodstats.infrastructure.persistence.SqliteRepository;
+import br.edu.floodstats.infrastructure.persistence.XmlRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class FloodAnalysisService {
     private final DataFetcherFactory fetcherFactory;
-    private final PersistenceFactory persistenceFactory;
     private final StatisticsCalculator statsCalc;
     private final TrendCalculator trendCalc;
     private final ReportService reportService;
     private final ReportGenerator reportGenerator;
+    private final List<HydrologyRepository> repositories;
 
     public FloodAnalysisService() {
         this.fetcherFactory = new DataFetcherFactory();
-        this.persistenceFactory = new PersistenceFactory();
         this.statsCalc = new StatisticsCalculator();
         this.trendCalc = new TrendCalculator();
         this.reportService = new ReportService();
         this.reportGenerator = new HtmlReportGenerator();
+        this.repositories = new ArrayList<>();
+        this.repositories.add(new SqliteRepository());
+        this.repositories.add(new JsonRepository());
+        this.repositories.add(new XmlRepository());
     }
 
     public br.edu.floodstats.application.dto.AnalysisResponse analyze(AnalysisRequest request, boolean forceOverwrite) {
@@ -101,20 +107,16 @@ public class FloodAnalysisService {
             StatisticalResult finalResult = trendCalc.calculate(records, partialResult);
 
             // 3. Optional Persistence
-            if (request.getPersistenceFormat() != PersistenceFormat.NONE) {
-                System.out.println("Salvando dados localmente (" + request.getPersistenceFormat() + ")...");
-                DataPersistence persistence = persistenceFactory.create(request.getPersistenceFormat());
-
-                String fileName;
-                if (request.getPersistenceFormat() == PersistenceFormat.SQLITE) {
-                    fileName = "sqlite_database";
-                } else {
-                    String ext = request.getPersistenceFormat().toString().toLowerCase();
-                    fileName = "dados_" + locName.replaceAll(" ", "_").toLowerCase() + "." + ext;
+            System.out.println("Salvando dados simultaneamente em Banco de Dados, JSON e XML...");
+            for (HydrologyRepository repository : repositories) {
+                try {
+                    repository.saveAll(records, locName);
+                } catch (Exception persistenceEx) {
+                    System.err.println(
+                            picocli.CommandLine.Help.Ansi.AUTO.string("@|yellow Aviso: Falha ao salvar no repositório "
+                                    + repository.getClass().getSimpleName() + " -> " + persistenceEx.getMessage()
+                                    + "|@"));
                 }
-
-                persistence.save(records, fileName);
-                System.out.println("Dados salvos com sucesso.");
             }
 
             // 4. Generate Report

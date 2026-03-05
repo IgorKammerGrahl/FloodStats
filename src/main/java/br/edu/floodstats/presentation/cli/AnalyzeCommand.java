@@ -108,6 +108,9 @@ public class AnalyzeCommand implements Callable<Integer> {
 
             service.analyze(request, force);
 
+            System.out.println(CommandLine.Help.Ansi.AUTO
+                    .string("\u001B[32mDados persistidos com sucesso em SQLite, JSON e XML!\u001B[0m"));
+
             return 0;
         } catch (Exception e) {
             System.err.println(CommandLine.Help.Ansi.AUTO.string("@|red,bold ERRO NA EXECUÇÃO:|@ " + e.getMessage()));

@@ -1,5 +1,6 @@
 package br.edu.floodstats.infrastructure.api;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -11,20 +12,23 @@ import java.time.Duration;
 
 import br.edu.floodstats.infrastructure.config.ApiConfig;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 public class AnaTokenService {
-    private static final String CACHE_FILE_NAME = "ana_token_cache.properties";
-    private static final long MAX_AGE_MILLIS = 55 * 60 * 1000; // 55 minutos
+    private static final String CACHE_FILE_PATH = System.getProperty("user.home") + "/.floodstats_ana_token.json";
+    private static final long MAX_AGE_MILLIS = 55L * 60 * 1000; // 55 minutes
+
+    private record TokenCache(String token, long expirationTimeMillis) {
+    }
 
     private final HttpClient httpClient;
     private final ApiConfig apiConfig;
+    private final Gson gson;
 
     public AnaTokenService() {
         this.apiConfig = new ApiConfig();
+        this.gson = new Gson();
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(10))
@@ -81,39 +85,31 @@ public class AnaTokenService {
     }
 
     private String loadCachedToken() {
-        File file = new File(CACHE_FILE_NAME);
+        File file = new File(CACHE_FILE_PATH);
         if (!file.exists()) {
             return null;
         }
 
-        try (FileInputStream in = new FileInputStream(file)) {
-            Properties props = new Properties();
-            props.load(in);
-
-            String token = props.getProperty("token");
-            String timestampStr = props.getProperty("timestamp");
-
-            if (token != null && timestampStr != null) {
-                long timestamp = Long.parseLong(timestampStr);
-                if (System.currentTimeMillis() - timestamp < MAX_AGE_MILLIS) {
-                    return token;
-                }
+        try (FileReader reader = new FileReader(file)) {
+            TokenCache cache = gson.fromJson(reader, TokenCache.class);
+            if (cache != null && System.currentTimeMillis() < cache.expirationTimeMillis()) {
+                System.out.println("[INFO] Usando token da ANA existente do cache local.");
+                return cache.token();
             }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Aviso: Falha ao ler cache do token da ANA: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao ler cache do token JSON da ANA: " + e.getMessage());
         }
         return null;
     }
 
     private void saveTokenToCache(String token) {
-        Properties props = new Properties();
-        props.setProperty("token", token);
-        props.setProperty("timestamp", String.valueOf(System.currentTimeMillis()));
+        long expiration = System.currentTimeMillis() + MAX_AGE_MILLIS;
+        TokenCache cache = new TokenCache(token, expiration);
 
-        try (FileOutputStream out = new FileOutputStream(CACHE_FILE_NAME)) {
-            props.store(out, "ANA API Token Cache");
-        } catch (IOException e) {
-            System.err.println("Aviso: Falha ao gravar cache do token da ANA: " + e.getMessage());
+        try (FileWriter writer = new FileWriter(CACHE_FILE_PATH)) {
+            gson.toJson(cache, writer);
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao gravar cache JSON do token da ANA: " + e.getMessage());
         }
     }
 }
