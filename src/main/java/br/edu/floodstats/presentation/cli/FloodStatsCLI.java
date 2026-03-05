@@ -3,7 +3,7 @@ package br.edu.floodstats.presentation.cli;
 import picocli.CommandLine.Command;
 
 @Command(name = "floodstats", description = "FloodStats CLI - Sistema de Monitoramento de Enchentes", mixinStandardHelpOptions = true, version = "1.0", subcommands = {
-        AnalyzeCommand.class })
+        AnalyzeCommand.class, AnalyzeGumbelCommand.class })
 public class FloodStatsCLI implements Runnable {
 
     @Override

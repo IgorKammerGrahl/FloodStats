@@ -48,7 +48,9 @@ public class AnalyzeCommand implements Callable<Integer> {
     public Integer call() {
         try (Scanner scanner = new Scanner(System.in)) {
 
-            if (latitude == null || longitude == null || startDateStr == null || endDateStr == null) {
+            boolean isInteractive = (locationName == null || locationName.trim().isEmpty());
+
+            if (isInteractive) {
                 System.out.println(CommandLine.Help.Ansi.AUTO
                         .string("\n@|cyan Bem-vindo ao Assistente Interativo do FloodStats!|@"));
                 System.out.println("Deixe em branco e pressione [ENTER] para usar os valores padrão.\n");
@@ -57,24 +59,42 @@ public class AnalyzeCommand implements Callable<Integer> {
                 String inLoc = scanner.nextLine().trim();
                 locationName = inLoc.isEmpty() ? "15400000" : inLoc;
 
-                System.out.print("Digite a Latitude [Padrão: -8.76]: ");
-                String inLat = scanner.nextLine().trim();
-                latitude = inLat.isEmpty() ? -8.76 : Double.parseDouble(inLat.replace(",", "."));
+                if (latitude == null) {
+                    System.out.print("Digite a Latitude [Padrão: -8.76]: ");
+                    String inLat = scanner.nextLine().trim();
+                    latitude = inLat.isEmpty() ? -8.76 : Double.parseDouble(inLat.replace(",", "."));
+                }
 
-                System.out.print("Digite a Longitude [Padrão: -63.90]: ");
-                String inLon = scanner.nextLine().trim();
-                longitude = inLon.isEmpty() ? -63.90 : Double.parseDouble(inLon.replace(",", "."));
+                if (longitude == null) {
+                    System.out.print("Digite a Longitude [Padrão: -63.90]: ");
+                    String inLon = scanner.nextLine().trim();
+                    longitude = inLon.isEmpty() ? -63.90 : Double.parseDouble(inLon.replace(",", "."));
+                }
 
-                System.out.print("Data de Início (YYYY-MM-DD) [Padrão: 2020-01-01]: ");
-                String inStart = scanner.nextLine().trim();
-                startDateStr = inStart.isEmpty() ? "2020-01-01" : inStart;
+                if (startDateStr == null || startDateStr.isEmpty()) {
+                    System.out.print("Data de Início (YYYY-MM-DD) [Padrão: 2020-01-01]: ");
+                    String inStart = scanner.nextLine().trim();
+                    startDateStr = inStart.isEmpty() ? "2020-01-01" : inStart;
+                }
 
-                System.out.print("Data Final (YYYY-MM-DD) [Padrão: 2020-12-31]: ");
-                String inEnd = scanner.nextLine().trim();
-                endDateStr = inEnd.isEmpty() ? "2020-12-31" : inEnd;
+                if (endDateStr == null || endDateStr.isEmpty()) {
+                    System.out.print("Data Final (YYYY-MM-DD) [Padrão: 2020-12-31]: ");
+                    String inEnd = scanner.nextLine().trim();
+                    endDateStr = inEnd.isEmpty() ? "2020-12-31" : inEnd;
+                }
+            } else {
+                if (latitude == null)
+                    latitude = -8.76;
+                if (longitude == null)
+                    longitude = -63.90;
+                if (startDateStr == null || startDateStr.isEmpty())
+                    startDateStr = "2020-01-01";
+                if (endDateStr == null || endDateStr.isEmpty())
+                    endDateStr = "2020-12-31";
+            }
 
-                if (dataType == null)
-                    dataType = DataType.RIVER_DISCHARGE;
+            if (dataType == null) {
+                dataType = DataType.RIVER_DISCHARGE;
             }
 
             LocalDate startDate = LocalDate.parse(startDateStr);
@@ -85,7 +105,10 @@ public class AnalyzeCommand implements Callable<Integer> {
                 locName = latitude + "_" + longitude;
             }
 
-            String reportFileName = "relatorio_" + locName.replaceAll(" ", "_").toLowerCase() + ".html";
+            // Security fix: Sanitize input to prevent Path Traversal
+            locName = locName.replaceAll("[^a-zA-Z0-9_\\.-]", "_");
+
+            String reportFileName = "output/reports/relatorio_" + locName.toLowerCase() + ".html";
             File reportFile = new File(reportFileName);
 
             if (reportFile.exists() && !force) {

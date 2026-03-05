@@ -26,10 +26,18 @@ public class ApiConfig {
     }
 
     public String getAnaApiIdentificador() {
+        String envValue = System.getenv("ANA_API_IDENTIFICADOR");
+        if (envValue != null && !envValue.trim().isEmpty()) {
+            return envValue;
+        }
         return properties.getProperty("ana.api.identificador", "");
     }
 
     public String getAnaApiSenha() {
+        String envValue = System.getenv("ANA_API_SENHA");
+        if (envValue != null && !envValue.trim().isEmpty()) {
+            return envValue;
+        }
         return properties.getProperty("ana.api.senha", "");
     }
 }

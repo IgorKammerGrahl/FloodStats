@@ -55,8 +55,7 @@ public class AnaTokenService {
             senha = "";
         }
 
-        System.out.println("[DEBUG] Identificador a ser enviado: [" + identificador + "]");
-        System.out.println("[DEBUG] Senha a ser enviada: [" + senha + "]");
+        // Removed debug prints containing sensitive credentials
 
         // URL obrigatória do manual (diferente da base para outras requisições)
         HttpRequest request = HttpRequest.newBuilder()
@@ -108,6 +107,14 @@ public class AnaTokenService {
 
         try (FileWriter writer = new FileWriter(CACHE_FILE_PATH)) {
             gson.toJson(cache, writer);
+
+            // Restrict file permissions to 600 (rw-------) for security
+            File tokenFile = new File(CACHE_FILE_PATH);
+            tokenFile.setReadable(false, false);
+            tokenFile.setWritable(false, false);
+            tokenFile.setExecutable(false, false);
+            tokenFile.setReadable(true, true); // Owner can read
+            tokenFile.setWritable(true, true); // Owner can write
         } catch (Exception e) {
             System.err.println("Aviso: Falha ao gravar cache JSON do token da ANA: " + e.getMessage());
         }

@@ -18,11 +18,14 @@ import java.util.logging.Logger;
 
 public class SqlitePersistence implements DataPersistence {
     private static final Logger LOGGER = Logger.getLogger(SqlitePersistence.class.getName());
-    private static final String URL = "jdbc:sqlite:floodstats.db";
+    private static final String DIR = "output/sqlite";
+    private static final String URL = "jdbc:sqlite:output/sqlite/floodstats.db";
 
     public SqlitePersistence() {
-        try (Connection conn = DriverManager.getConnection(URL);
-                Statement stmt = conn.createStatement()) {
+        try {
+            java.nio.file.Files.createDirectories(java.nio.file.Paths.get(DIR));
+            Connection conn = DriverManager.getConnection(URL);
+            Statement stmt = conn.createStatement();
 
             String sql = """
                     CREATE TABLE IF NOT EXISTS hydro_records (
@@ -37,6 +40,7 @@ public class SqlitePersistence implements DataPersistence {
                     );
                     """;
             stmt.execute(sql);
+            conn.close();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro ao inicializar banco SQLite", e);
         }

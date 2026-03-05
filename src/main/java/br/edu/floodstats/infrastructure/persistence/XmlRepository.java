@@ -15,7 +15,9 @@ public class XmlRepository implements HydrologyRepository {
     @Override
     public void saveAll(List<HydroRecord> records, String stationId) throws Exception {
         String safeStationId = stationId != null ? stationId.replaceAll(" ", "_").toLowerCase() : "unknown";
-        String fileName = "dados_" + safeStationId + ".xml";
+        java.nio.file.Path outputPath = java.nio.file.Paths.get("output/xml");
+        java.nio.file.Files.createDirectories(outputPath);
+        String fileName = outputPath.resolve("dados_" + safeStationId + ".xml").toString();
         persistence.save(records, fileName);
     }
 }

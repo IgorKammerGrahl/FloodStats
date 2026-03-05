@@ -120,7 +120,9 @@ public class FloodAnalysisService {
             }
 
             // 4. Generate Report
-            String reportFileName = "relatorio_" + locName.replaceAll(" ", "_").toLowerCase()
+            String reportDirStr = "output/reports/";
+            java.nio.file.Files.createDirectories(java.nio.file.Paths.get(reportDirStr));
+            String reportFileName = reportDirStr + "relatorio_" + locName.replaceAll(" ", "_").toLowerCase()
                     + ".html";
             if (reportService.checkAndConfirmOverwrite(reportFileName, forceOverwrite)) {
                 System.out.println("Gerando relatório HTML...");
